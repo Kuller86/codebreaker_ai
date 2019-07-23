@@ -1,0 +1,17 @@
+# frozen_string_literal: true
+
+require 'pry'
+require 'date'
+require 'i18n'
+require 'io/console'
+require 'yaml'
+require_relative 'codebreaker_ai/version'
+require_relative 'codebreaker_ai/config'
+require_relative 'codebreaker_ai/exceptions'
+require_relative 'codebreaker_ai/validators'
+require_relative 'codebreaker_ai/entities/user'
+require_relative 'codebreaker_ai/entities/statistics'
+require_relative 'codebreaker_ai/secret_number_resolver'
+require_relative 'codebreaker_ai/game'
+require_relative 'codebreaker_ai/cli'
+require_relative 'codebreaker_ai/utils/statistics_manager'

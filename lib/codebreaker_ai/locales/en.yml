@@ -1,0 +1,37 @@
+en:
+  welcome: 'Welcome'
+  lose: 'LOSE'
+  win: 'WIN'
+  start: 'Start'
+  good_bye: 'Good Bye'
+  wrong_command: 'Wrong command'
+  press_any_key: 'press any key...'
+  do_you_want_to_start_new_game: 'Do you  want to start a new game? (y/n)'
+  do_you_want_to_save_your_result: 'Do you want to save your result? (y/n)'
+  sign:
+    enter_your_name: 'Enter your name'
+    choose_difficulty: 'Choose difficulty'
+  validator:
+    invalid_name: 'Name must be between 3 and 20 characters long!'
+    invalid_difficulty: 'Invalid difficulty!'
+    invalid_confirmation: 'Invalid confirmation!'
+    guess:
+      length: 'Length must be %s digits'
+      range: 'Each digit must be number in the range %s - %s'
+  menu:
+    start: 'Start'
+    stats: 'Stats'
+    rules: 'Rules'
+    exit: 'Exit'
+  game:
+    your_guess: 'Your guess'
+  hint:
+    no_hints_left: 'No hints left!'
+  error:
+    class:
+      abstarct_class: 'You are trying to instantiate an abstract class %s!'
+      abstarct_method: 'You are trying to call an abstract method %s!'
+    file_not_found: 'File not found'
+    game_wasnt_initialized: 'The game was not initialized'
+  allowed_value: 'Allowed value'
+  allowed_values: 'Allowed values'
