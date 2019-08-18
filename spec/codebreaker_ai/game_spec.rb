@@ -14,7 +14,7 @@ module CodebreakerAi
 
       context 'when restore state' do
         let(:state) do
-          { secret_number: '1678', available_hints_indexes: [0, 1, 2], user: user,
+          { secret_number: '1624', available_hints: [2, 4, 1], user: user,
             attempts_count: 12, hints_count: 1, show_hints: [1, 7], state: Game::STATES['progress'] }
         end
         let(:game_state) { GameState.new(state) }
@@ -27,8 +27,8 @@ module CodebreakerAi
           expect(game.instance_variable_get(:@secret_number)).to eq(game_state.secret_number)
         end
 
-        it 'check available_hints_indexes' do
-          expect(game.instance_variable_get(:@available_hints_indexes)).to eq(game_state.available_hints_indexes)
+        it 'check available_hints' do
+          expect(game.instance_variable_get(:@available_hints)).to eq(game_state.available_hints)
         end
 
         it 'check user' do
@@ -110,11 +110,6 @@ module CodebreakerAi
         game.instance_variable_set(:@secret_number, [1, 2, 3, 4])
       end
 
-      it 'when get hint (define)' do
-        allow(game).to receive(:hint_index).and_return(0)
-        expect(game.hint).to eq(1)
-      end
-
       it 'when get hint (random)' do
         expect(game.hint).to be_instance_of(Integer)
       end
@@ -128,7 +123,7 @@ module CodebreakerAi
     context 'when methods *_used' do
       before do
         game.start
-        state = { secret_number: '1678', available_hints_indexes: [1, 2, 3], user: user,
+        state = { secret_number: '1634', available_hints: [3, 6, 1], user: user,
                   attempts_count: 12, hints_count: 1, show_hints: [1], state: Game::STATES['progress'] }
         game_state = CodebreakerAi::GameState.new(state)
         game.restore_state(game_state)
@@ -146,7 +141,7 @@ module CodebreakerAi
     context 'when tests statistics' do
       before do
         game.start
-        state = { secret_number: '1678', available_hints_indexes: [1, 2, 3], user: user,
+        state = { secret_number: '1634', available_hints: [3, 1, 6], user: user,
                   attempts_count: 12, hints_count: 1, show_hints: [1], state: Game::STATES['progress'] }
         game_state = GameState.new(state)
         game.restore_state(game_state)

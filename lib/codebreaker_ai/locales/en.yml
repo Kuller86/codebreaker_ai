@@ -33,6 +33,7 @@ en:
       abstarct_method: 'You are trying to call an abstract method %s!'
     file_not_found: 'File not found'
     game_wasnt_initialized: 'The game was not initialized'
+    game_end: 'Game end'
   allowed_value: 'Allowed value'
   allowed_values: 'Allowed values'
   rules: >-

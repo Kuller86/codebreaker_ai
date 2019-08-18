@@ -2,12 +2,12 @@
 
 module CodebreakerAi
   class GameState
-    attr_reader :secret_number, :available_hints_indexes, :user, :attempts_count, :hints_count, :show_hints,
+    attr_reader :secret_number, :available_hints, :user, :attempts_count, :hints_count, :show_hints,
                 :state
 
     def initialize(state)
       @secret_number = state[:secret_number]
-      @available_hints_indexes = state[:available_hints_indexes]
+      @available_hints = state[:available_hints]
       @user = state[:user]
       @attempts_count = state[:attempts_count]
       @hints_count = state[:hints_count]
@@ -19,6 +19,18 @@ module CodebreakerAi
   class Game
     attr_reader :attempts_count, :hints_count, :show_hints
     STATES = { not_started: 0, progress: 1, win: 2, lose: 3 }.freeze
+
+    NUMBER_SIZE = 4
+    ALLOWED_NUMBERS = (1..6).freeze
+
+    FULLY_MATCH_SIGN = '+'
+    PARTLY_MATCH_SIGN = '-'
+
+    DIFFICULTIES = {
+      easy: { attempts: 15, hints: 2 },
+      medium: { attempts: 10, hints: 1 },
+      hell: { attempts: 5, hints: 1 }
+    }.freeze
 
     # @param [CodebreakerAi::User] user
     def initialize(user)
@@ -33,7 +45,7 @@ module CodebreakerAi
 
     def create_state
       state = {
-        secret_number: @secret_number, available_hints_indexes: @available_hints_indexes, user: @user,
+        secret_number: @secret_number, available_hints: @available_hints, user: @user,
         attempts_count: @attempts_count,
         hints_count: @hints_count,
         show_hints: @show_hints,
@@ -45,7 +57,7 @@ module CodebreakerAi
     # @param [CodebreakerAi::GameState] game_state
     def restore_state(game_state)
       @secret_number = game_state.secret_number
-      @available_hints_indexes = game_state.available_hints_indexes
+      @available_hints = game_state.available_hints
       @user = game_state.user
       @attempts_count = game_state.attempts_count
       @hints_count = game_state.hints_count
@@ -55,12 +67,12 @@ module CodebreakerAi
 
     def start
       @secret_number = generate_secret_number
-      @available_hints_indexes = (0...NUMBER_SIZE).to_a
+      @available_hints = @secret_number.clone.shuffle
       @state = STATES[:progress]
     end
 
     def match(input_number)
-      raise EndGameException, I18n.t('error.game_wasnt_initialized') if @state > STATES[:progress]
+      raise EndGameException if @state > STATES[:progress]
 
       result = SecretNumberResolver.resolve(secret_number: @secret_number, input_number: input_number)
       @attempts_count -= 1
@@ -72,14 +84,13 @@ module CodebreakerAi
     end
 
     def hint
-      raise EndGameException, I18n.t('error.game_wasnt_initialized') if @state > STATES[:progress]
-      raise HintException, I18n.t('hint.no_hints_left') if @hints_count < 1
+      raise EndGameException, I18n.t('error.game_end') if @state > STATES[:progress]
+      raise HintException, I18n.t('hint.no_hints_left') if @hints_count.zero?
 
       @hints_count -= 1
-      index = hint_index
-
-      @show_hints << @secret_number[index]
-      @secret_number[index]
+      value = @available_hints.pop
+      @show_hints << value
+      value
     end
 
     def hints_used
@@ -106,16 +117,12 @@ module CodebreakerAi
     private
 
     def recalculate_state(match_result)
-      @state = STATES[:lose] if @attempts_count < 1
+      @state = STATES[:lose] if @attempts_count.zero?
       @state = STATES[:win] if NUMBER_SIZE == match_result[:strict_matches].to_i
     end
 
     def generate_secret_number
       ALLOWED_NUMBERS.to_a.sample(NUMBER_SIZE)
-    end
-
-    def hint_index
-      @available_hints_indexes.delete_at(@available_hints_indexes.sample)
     end
   end
 end

@@ -3,15 +3,15 @@
 module CodebreakerAi
   class AbstractValidator
     def initialize
-      raise AbstractClassError, I18n.t(:"error.class.abstarct_class")
+      raise AbstractClassError, I18n.t('error.class.abstarct_method')
     end
 
     def valid(_value)
-      raise AbstractMethodError, I18n.t(:"error.class.abstarct_method")
+      raise AbstractMethodError, I18n.t('error.class.abstarct_method')
     end
 
     def message
-      raise AbstractMethodError, I18n.t(:"error.class.abstarct_method")
+      raise AbstractMethodError, I18n.t('error.class.abstarct_method')
     end
   end
 
@@ -23,7 +23,7 @@ module CodebreakerAi
     end
 
     def message
-      I18n.t(:"validator.invalid_name")
+      I18n.t('validator.invalid_name')
     end
   end
 
@@ -31,11 +31,11 @@ module CodebreakerAi
     def initialize; end
 
     def valid(difficulty)
-      DIFFICULTIES.include? difficulty.to_sym.downcase
+      Game::DIFFICULTIES.include? difficulty.to_sym.downcase
     end
 
     def message
-      I18n.t(:"validator.invalid_difficulty")
+      I18n.t('validator.invalid_difficulty')
     end
   end
 
@@ -55,8 +55,8 @@ module CodebreakerAi
 
     def message
       format('%<message>s %<title>s: %<values>s',
-             message: I18n.t(:"validator.invalid_confirmation"),
-             title: I18n.t(:allowed_values),
+             message: I18n.t('validator.invalid_confirmation'),
+             title: I18n.t('allowed_values'),
              values: self.CONFIRMATION.to_a.join(', '))
     end
   end
@@ -70,9 +70,9 @@ module CodebreakerAi
       @message = nil
       value = value.to_s
       if check_size(value)
-        @message = format(I18n.t(:"validator.guess.length"), NUMBER_SIZE)
+        @message = format(I18n.t('validator.guess.length'), Game::NUMBER_SIZE)
       elsif check_range(value)
-        @message = format(I18n.t(:"validator.guess.range"), min, max)
+        @message = format(I18n.t('validator.guess.range'), min, max)
       end
 
       @message.nil?
@@ -81,7 +81,7 @@ module CodebreakerAi
     private
 
     def check_size(value)
-      NUMBER_SIZE != value.length
+      Game::NUMBER_SIZE != value.length
     end
 
     def check_range(value)
@@ -90,11 +90,11 @@ module CodebreakerAi
     end
 
     def min
-      ALLOWED_NUMBERS.to_a.min
+      Game::ALLOWED_NUMBERS.to_a.min
     end
 
     def max
-      ALLOWED_NUMBERS.to_a.max
+      Game::ALLOWED_NUMBERS.to_a.max
     end
   end
 end
