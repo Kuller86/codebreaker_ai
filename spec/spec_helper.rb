@@ -3,9 +3,7 @@
 require 'simplecov'
 
 SimpleCov.start do
-  add_filter(%r{\/spec\/})
   minimum_coverage 95
-  add_group 'lib', 'lib'
 end
 
 require_relative '../lib/codebreaker_ai'
