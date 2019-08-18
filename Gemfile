@@ -9,7 +9,6 @@ gem 'i18n'
 group :development do
   gem 'bundle-audit', '~> 0.1.0'
   gem 'fasterer', '~> 0.5.1'
-  # gem 'i18n', '~> 1.6'
   gem 'overcommit', '~> 0.48.0'
   gem 'pry', '~> 0.12.2'
   gem 'rubocop', '~> 0.69.0'

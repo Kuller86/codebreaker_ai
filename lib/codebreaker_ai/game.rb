@@ -3,7 +3,7 @@
 module CodebreakerAi
   class GameState
     attr_reader :secret_number, :available_hints_indexes, :user, :attempts_count, :hints_count, :show_hints,
-                :ready_to_play
+                :state
 
     def initialize(state)
       @secret_number = state[:secret_number]
@@ -12,21 +12,13 @@ module CodebreakerAi
       @attempts_count = state[:attempts_count]
       @hints_count = state[:hints_count]
       @show_hints = state[:show_hints]
-      @ready_to_play = state[:ready_to_play]
+      @state = state[:state]
     end
   end
 
   class Game
     attr_reader :attempts_count, :hints_count, :show_hints
-
-    class << self
-      def rules
-        path = File.expand_path('lib/codebreaker_ai/resources/rules') + "/#{I18n.locale}.txt"
-        raise format('%<trans>s (%<path>s)', trans: I18n.t(:"error.file_not_found"), path: path) unless File.exist? path
-
-        IO.read(path)
-      end
-    end
+    STATES = { not_started: 0, progress: 1, win: 2, lose: 3 }.freeze
 
     # @param [CodebreakerAi::User] user
     def initialize(user)
@@ -36,7 +28,7 @@ module CodebreakerAi
       @attempts_count = DIFFICULTIES[@difficulty][:attempts]
       @hints_count = DIFFICULTIES[@difficulty][:hints]
       @show_hints = []
-      @ready_to_play = false
+      @state = STATES[:not_started]
     end
 
     def create_state
@@ -45,7 +37,7 @@ module CodebreakerAi
         attempts_count: @attempts_count,
         hints_count: @hints_count,
         show_hints: @show_hints,
-        ready_to_play: @ready_to_play
+        state: @state
       }
       CodebreakerAi::GameState.new(state)
     end
@@ -58,27 +50,30 @@ module CodebreakerAi
       @attempts_count = game_state.attempts_count
       @hints_count = game_state.hints_count
       @show_hints = game_state.show_hints
-      @ready_to_play = game_state.ready_to_play
+      @state = game_state.state
     end
 
     def start
       @secret_number = generate_secret_number
       @available_hints_indexes = (0...NUMBER_SIZE).to_a
-      @ready_to_play = true
+      @state = STATES[:progress]
     end
 
     def match(input_number)
-      raise BrokenGameException, I18n.t(:"error.game_wasnt_initialized") unless @ready_to_play
+      raise EndGameException, I18n.t('error.game_wasnt_initialized') if @state > STATES[:progress]
 
       result = SecretNumberResolver.resolve(secret_number: @secret_number, input_number: input_number)
       @attempts_count -= 1
-      win?(result[:strict_matches])
-      lose?
+      recalculate_state(result)
+      raise WinException, I18n.t('win') if win?
+      raise LoseException, I18n.t('lose') if lose?
+
       result
     end
 
     def hint
-      raise HintException, I18n.t(:"hint.no_hints_left") if @hints_count < 1
+      raise EndGameException, I18n.t('error.game_wasnt_initialized') if @state > STATES[:progress]
+      raise HintException, I18n.t('hint.no_hints_left') if @hints_count < 1
 
       @hints_count -= 1
       index = hint_index
@@ -87,32 +82,33 @@ module CodebreakerAi
       @secret_number[index]
     end
 
-    def hints_left
-      format('%<used>s/%<total>s',
-             used: DIFFICULTIES[@difficulty][:hints] - @hints_count,
-             total: DIFFICULTIES[@difficulty][:hints])
+    def hints_used
+      DIFFICULTIES[@difficulty][:hints] - @hints_count
     end
 
-    def attempts_left
-      format('%<used>s/%<total>s',
-             used: DIFFICULTIES[@difficulty][:attempts] - @attempts_count,
-             total: DIFFICULTIES[@difficulty][:attempts])
+    def attempts_used
+      DIFFICULTIES[@difficulty][:attempts] - @attempts_count
     end
 
-    def win?(strict_matches)
-      raise WinException, I18n.t(:win) if NUMBER_SIZE == strict_matches.to_i
+    def win?
+      @state == STATES[:win]
     end
 
     def lose?
-      raise LoseException, I18n.t(:lose) if @attempts_count < 1
+      @state == STATES[:lose]
     end
 
     def statistics
-      CodebreakerAi::Statistics.new(name: @user.name, difficulty: @user.difficulty, attempts_left: attempts_left,
-                     hints_left: hints_left, date: Date.new)
+      CodebreakerAi::Statistics.new(name: @user.name, difficulty: @user.difficulty, attempts_used: attempts_used,
+                                    hints_used: hints_used, date: Date.new)
     end
 
     private
+
+    def recalculate_state(match_result)
+      @state = STATES[:lose] if @attempts_count < 1
+      @state = STATES[:win] if NUMBER_SIZE == match_result[:strict_matches].to_i
+    end
 
     def generate_secret_number
       ALLOWED_NUMBERS.to_a.sample(NUMBER_SIZE)

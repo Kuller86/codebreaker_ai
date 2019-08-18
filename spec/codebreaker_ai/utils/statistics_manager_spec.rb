@@ -4,8 +4,8 @@ module CodebreakerAi
   RSpec.describe StatisticsManager do
     let(:filename) { File.expand_path('../../../storage_ai/statistics_test.yaml', __dir__) }
     let(:statistics) do
-      CodebreakerAi::Statistics.new(name: 'Alex', difficulty: 'easy', attempts_left: '12/15',
-                                    hints_left: '0/2', date: Date.new)
+      CodebreakerAi::Statistics.new(name: 'Alex', difficulty: 'easy', attempts_used: 5,
+                                    hints_used: 0, date: Date.new)
     end
 
     context 'when data save cases' do
@@ -14,7 +14,6 @@ module CodebreakerAi
       end
 
       it 'when if empty file' do
-        expect(File.size(filename)).to eq(0)
         described_class.save_data(statistics, filename)
         expect(File.size(filename)).not_to eq(0)
       end
